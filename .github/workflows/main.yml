@@ -10,7 +10,7 @@ jobs:
     build:
         runs-on: ubuntu-latest
         container:
-            image: gradle:7.3.3-jdk17-alpine
+            image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
         steps:
             - name: Checkout
               uses: actions/checkout@v4
