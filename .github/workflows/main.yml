@@ -1,4 +1,4 @@
-name: Workflow CI/CD
+name: CI/CD Pipeline
 
 on:
     push:
@@ -12,13 +12,13 @@ jobs:
         container:
             image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
         steps:
-            - name: Checkout
+            - name: Checkout source code
               uses: actions/checkout@v4
-            - name: Execução do build
+            - name: Build project
               run: |
                 ./gradlew --version
                 ./gradlew assemble --info
-            - name: Criação de artefatos
+            - name: Upload artifacts
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ env.artifact-name }}
