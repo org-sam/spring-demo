@@ -1,0 +1,26 @@
+name: Workflow CI/CD
+
+on:
+    push:
+
+env:
+    artifact-name: build-artifact
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        container:
+            image: gradle:7.3.3-jdk17-alpine
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Execução do build
+              run: |
+                ./gradlew --version
+                ./gradlew assemble --info
+            - name: Criação de artefatos
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ env.artifact-name }}
+                path: ./build/*
+                retention-days: 1
