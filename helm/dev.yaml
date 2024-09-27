@@ -1,0 +1,25 @@
+replicaCount: 1
+
+service:
+  targetPort: 8080
+
+pod:
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 60m
+    limits:
+      memory: 1Gi
+      cpu: 250m
+
+hpa:
+  enabled: false
+  minReplicaCount:  1
+  maxReplicaCount:  1
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+  memoryThreshold: '3276000000'
+
+configMap:
+  springProfilesActive: development

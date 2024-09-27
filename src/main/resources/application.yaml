@@ -1,0 +1,27 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  datasource:
+
+  jpa:
+    database: H2
+    show-sql: true
+    generate-ddl: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+logging:
+  level:
+    root: info
+  org:
+    springframework:
+      web:
+        filter:
+          CommonsRequestLoggingFilter: DEBUG

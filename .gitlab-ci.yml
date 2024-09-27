@@ -1,0 +1,61 @@
+include:
+  - project: 'platosedu/cosmos/devops/ci-cd-templates'
+    file: '/basic_publish_job_template.yml'
+  - project: 'platosedu/cosmos/devops/ci-cd-templates'
+    file: '/datadog_template.yml'
+
+variables:
+  IMAGE_TAG: ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_NAME}:${CI_PIPELINE_ID}
+
+stages:
+  - build
+  - publish
+  - deploy
+  - datadog_git
+
+build:
+  stage: build
+  image: gradle:7.3.3-jdk17-alpine
+  script:
+    - ./gradlew --version
+    - ./gradlew assemble --info
+  artifacts:
+    paths:
+      - build/*
+  only:
+    - master
+    - stage
+    - dev
+
+deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl:3.3.1
+  script:
+    - kubectl config use-context platosedu/cosmos/gitlab-k8s-agent:${CI_COMMIT_REF_NAME}
+    - kubectl create ns ${CI_PROJECT_NAME} --dry-run=client -o yaml | kubectl apply -f -
+    - |
+      kubectl create secret docker-registry gitlab-auth-${CI_PROJECT_NAME} \
+        --namespace=${CI_PROJECT_NAME} \
+        --docker-server=registry.gitlab.com \
+        --docker-username="$CI_DEPLOY_USER" \
+        --docker-password="$CI_DEPLOY_PASSWORD" \
+        --docker-email="$GITLAB_USER_EMAIL" -o yaml \
+        --dry-run=client | kubectl apply -f -
+    - |
+      helm upgrade ${CI_PROJECT_NAME} ./helm \
+        -f ./helm/${CI_COMMIT_REF_NAME}.yaml \
+        --atomic \
+        --install \
+        --debug \
+        --namespace ${CI_PROJECT_NAME} \
+        --set image=${IMAGE_TAG} \
+        --set datadogApiKeyBase64=$(echo -n $DATADOG_API_KEY | base64) \
+        --set datadogAppKeyBase64=$(echo -n $DATADOG_APP_KEY | base64) \
+        --set tagsDatadogVersion="v${CI_PIPELINE_ID}" \
+        --set ddGitCommitSHA="${CI_COMMIT_SHA}" \
+        --set ddGitRepositoryURL="${CI_PROJECT_URL}" \
+        --timeout 7m30s
+  only:
+    - master
+    - stage
+    - dev

@@ -1,0 +1,15 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  secretTargetRef:
+  - parameter: apiKey
+    name: {{ .Chart.Name }}
+    key: apiKey
+  - parameter: appKey
+    name: {{ .Chart.Name }}
+    key: appKey
+  - parameter: datadogSite
+    name: {{ .Chart.Name }}
+    key: datadogSite

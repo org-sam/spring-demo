@@ -1,0 +1,38 @@
+{{- if eq (.Values.hpa.enabled | toString) "true" }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  scaleTargetRef:
+    kind:          Deployment
+    name:          {{ .Chart.Name }}
+  pollingInterval:  30
+  cooldownPeriod:   300
+  idleReplicaCount: 0
+  minReplicaCount: {{ .Values.hpa.minReplicaCount }}
+  maxReplicaCount: {{ .Values.hpa.maxReplicaCount }}
+  fallback:
+    failureThreshold: {{ .Values.hpa.fallback.failureThreshold }}
+    replicas: {{ .Values.hpa.fallback.replicas }}
+  advanced:
+    restoreToOriginalReplicaCount: false
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 15
+  triggers:
+  - type: datadog
+    metricType: Value
+    metadata:
+      query: "avg:jvm.heap_memory{service:spring-demo,env:prd}"
+      queryValue: {{ .Values.hpa.memoryThreshold | quote }}
+    authenticationRef:
+      name: {{ .Chart.Name }}
+{{- end }}
