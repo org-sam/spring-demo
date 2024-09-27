@@ -2,6 +2,9 @@ name: CI/CD Pipeline
 
 on:
     push:
+        branches: ['main', 'stage', 'dev']
+    pull_request:
+        branches: ['main', 'stage', 'dev']
 
 env:
     artifact-name: build-artifact
@@ -24,3 +27,23 @@ jobs:
                 name: ${{ env.artifact-name }}
                 path: ./build/*
                 retention-days: 1
+    publish:
+        runs-on: ubuntu-latest
+        if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
+        environment: ${{ 
+            github.ref_name == 'main' && 'prod' || 
+            github.ref_name == 'stage' && 'stage' || 
+            github.ref_name == 'dev' && 'dev'
+            }}
+        steps:
+            - uses: actions/checkout@v2
+            - uses: docker://ghcr.io/kciter/aws-ecr-action:latest
+              with:
+                access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+                repo: org-sam/repo
+                region: us-east-1
+                tags: latest,${{ github.sha }}
+                create_repo: true
+                image_scanning_configuration: false
