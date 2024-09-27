@@ -27,6 +27,7 @@ jobs:
                 path: ./build/*
                 retention-days: 1
     publish:
+        needs: [build]
         runs-on: ubuntu-latest
         if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
         environment: ${{ 
@@ -36,6 +37,10 @@ jobs:
             }}
         steps:
             - uses: actions/checkout@v4
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: ${{ env.artifact-name }}
             - uses: kciter/aws-ecr-action@v3
               with:
                 access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
