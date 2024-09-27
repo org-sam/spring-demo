@@ -15,8 +15,7 @@ jobs:
         container:
             image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
         steps:
-            - name: Checkout source code
-              uses: actions/checkout@v4
+            - uses: actions/checkout@v4
             - name: Build project
               run: |
                 ./gradlew --version
@@ -36,8 +35,8 @@ jobs:
             github.ref_name == 'dev' && 'dev'
             }}
         steps:
-            - uses: actions/checkout@v2
-            - uses: docker://ghcr.io/kciter/aws-ecr-action:latest
+            - uses: actions/checkout@v4
+            - uses: kciter/aws-ecr-action@v3
               with:
                 access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
