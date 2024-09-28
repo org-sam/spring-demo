@@ -9,7 +9,7 @@ on:
 
 env:
     ARTIFACT_NAME: build-artifact
-    IMAGE_TAG: "${{ github.repository }}/${{ github.ref_name }}:${{ github.run_id }}"
+    IMAGE_TAG: "${{ github.repository }}/${{ github.ref_name }}"
 
 jobs:
     # build:
