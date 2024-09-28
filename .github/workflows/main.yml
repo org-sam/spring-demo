@@ -43,11 +43,11 @@ jobs:
             DOCKER_TAG: v${{ github.run_number }}
         steps:
             - uses: actions/checkout@v4
-            - name: Download artifacts
-              uses: actions/download-artifact@v4
-              with:
-                name: ${{ env.artifact-name }}
-                path: ./build
+            # - name: Download artifacts
+            #   uses: actions/download-artifact@v4
+            #   with:
+            #     name: ${{ env.artifact-name }}
+            #     path: ./build
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v3        
             - name: Docker Buildx
