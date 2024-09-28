@@ -12,25 +12,25 @@ env:
     IMAGE_TAG: "${{ github.repository }}/${{ github.ref_name }}"
 
 jobs:
-    # build:
-    #     runs-on: ubuntu-latest
-    #     container:
-    #         image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
-    #     steps:
-    #         - uses: actions/checkout@v4
-    #         - name: Build project
-    #           run: |
-    #             ./gradlew --version
-    #             ./gradlew assemble --info
-    #         - name: Upload artifacts
-    #           uses: actions/upload-artifact@v4
-    #           with:
-    #             name: ${{ env.ARTIFACT_NAME }}
-    #             path: ./build
-    #             retention-days: 1
+    build:
+        runs-on: ubuntu-latest
+        container:
+            image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build project
+              run: |
+                ./gradlew --version
+                ./gradlew assemble --info
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ env.ARTIFACT_NAME }}
+                path: ./build
+                retention-days: 1
 
     publish:
-        # needs: [build]
+        needs: [build]
         runs-on: ubuntu-latest
         if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
         environment: ${{ 
@@ -40,11 +40,11 @@ jobs:
             }}
         steps:
             - uses: actions/checkout@v4
-            # - name: Download artifacts
-            #   uses: actions/download-artifact@v4
-            #   with:
-            #     name: ${{ env.ARTIFACT_NAME }}
-            #     path: ./build            
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: ${{ env.ARTIFACT_NAME }}
+                path: ./build
             - uses: kciter/aws-ecr-action@v3
               with:
                 access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
