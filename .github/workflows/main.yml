@@ -60,7 +60,7 @@ jobs:
             - name: Push image
               uses: docker/build-push-action@v6
               with:
-                context: ./src
+                context: .
                 platforms: linux/amd64,linux/arm64
                 push: true
                 tags: |
