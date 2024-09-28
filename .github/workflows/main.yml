@@ -50,7 +50,7 @@ jobs:
                 account_id: ${{ secrets.AWS_ACCOUNT_ID }}
                 repo: org-sam/repo
                 region: us-east-1
-                tags: "latest, ${{ github.sha }}"
+                tags: latest
                 create_repo: true
                 image_scanning_configuration: false
 
