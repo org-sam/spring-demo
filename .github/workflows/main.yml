@@ -50,7 +50,7 @@ jobs:
               with:
                 dockerfile: ./Dockerfile
                 no-fail: true
-            - name: Build an image from Dockerfile
+            - name: Build an image for Trivy
               run: |
                 docker build -t ${{ env.IMAGE_TAG }}:${{ github.run_id }} .
             - name: Run Trivy vulnerability scanner
@@ -58,14 +58,18 @@ jobs:
               with:
                 scan-type: 'image'
                 image-ref: '${{ env.IMAGE_TAG }}:${{ github.run_id }}'
-                format: 'table'                
+                format: 'table'
+                ignore-unfixed: true
                 vuln-type: 'os,library'
-                severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-                # output: 'trivy-docker-result.sarif'
-            # - name: Upload Trivy scan results to GitHub Security tab
-            #   uses: github/codeql-action/upload-sarif@v3
-            #   with:
-            #     sarif_file: 'trivy-docker-result.sarif'            
+                severity: 'HIGH,CRITICAL'
+            - name: Run Trivy vulnerability scannerin IaC mode
+              uses: aquasecurity/trivy-action@0.23.0
+              with:
+                  scan-type: 'config'
+                  format: 'table'
+                  ignore-unfixed: true
+                  severity: 'HIGH,CRITICAL'
+                
             # - uses: kciter/aws-ecr-action@v3
             #   with:
             #     access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
