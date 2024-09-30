@@ -22,8 +22,7 @@ jobs:
               run: |
                 ./gradlew --version
                 ./gradlew assemble --info
-            - name: Upload artifacts
-              uses: actions/upload-artifact@v4
+            - uses: actions/upload-artifact@v4
               with:
                 name: ${{ env.ARTIFACT_NAME }}
                 path: ./build
@@ -40,8 +39,7 @@ jobs:
             }}
         steps:
             - uses: actions/checkout@v4
-            - name: Download artifacts
-              uses: actions/download-artifact@v4
+            - uses: actions/download-artifact@v4
               with:
                 name: ${{ env.ARTIFACT_NAME }}
                 path: ./build
@@ -52,12 +50,12 @@ jobs:
                 no-fail: true
             - name: Build an image for Trivy
               run: |
-                docker build -t ${{ env.IMAGE_TAG }}:${{ github.run_id }} .
-            - name: Run Trivy vulnerability scanner
+                docker build -t trivy-image:${{ github.run_id }} .
+            - name: Trivy image vulnerability scanner
               uses: aquasecurity/trivy-action@0.23.0
               with:
                 scan-type: 'image'
-                image-ref: '${{ env.IMAGE_TAG }}:${{ github.run_id }}'
+                image-ref: 'trivy-image:${{ github.run_id }}'
                 format: 'table'
                 ignore-unfixed: true
                 vuln-type: 'os,library'
@@ -72,13 +70,3 @@ jobs:
                 tags: latest,${{ github.run_id }}
                 create_repo: true
                 image_scanning_configuration: false
-            - name: List Images
-              run: |
-                docker images
-
-
-
-        
-              
-        
-              
