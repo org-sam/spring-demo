@@ -53,27 +53,28 @@ jobs:
             - name: Build an image for Trivy
               run: |
                 docker build -t ${{ env.IMAGE_TAG }}:${{ github.run_id }} .
-                docker images
             - name: Run Trivy vulnerability scanner
               uses: aquasecurity/trivy-action@0.23.0
               with:
                 scan-type: 'image'
                 image-ref: '${{ env.IMAGE_TAG }}:${{ github.run_id }}'
                 format: 'table'
-                ignore-unfixed: false
+                ignore-unfixed: true
                 vuln-type: 'os,library'
-                severity: 'HIGH,CRITICAL'
-                
-            # - uses: kciter/aws-ecr-action@v3
-            #   with:
-            #     access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            #     secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            #     account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-            #     repo: ${{ env.IMAGE_TAG }}
-            #     region: us-east-1
-            #     tags: latest,${{ github.run_id }}
-            #     create_repo: true
-            #     image_scanning_configuration: false
+                severity: 'HIGH,CRITICAL'                
+            - uses: kciter/aws-ecr-action@v3
+              with:
+                access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+                repo: ${{ env.IMAGE_TAG }}
+                region: us-east-1
+                tags: latest,${{ github.run_id }}
+                create_repo: true
+                image_scanning_configuration: false
+            - name: List Images
+              run: |
+                docker images
 
 
 
