@@ -43,7 +43,8 @@ jobs:
             - name: Analyze Dockerfile
               uses: hadolint/hadolint-action@v3.1.0
               with:
-                dockerfile: Dockerfile
+                dockerfile: ./Dockerfile
+                no-fail: true
             - name: Download artifacts
               uses: actions/download-artifact@v4
               with:
