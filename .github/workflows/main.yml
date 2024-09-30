@@ -74,5 +74,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - run: git clone --depth 1 https://github.com/org-sam/repo-deploy && ls -l
+            - name: Checkout helm-charts repository
+              uses: actions/checkout@v4
+              with:
+                repository: org-sam/helm-charts
+                path: helm-charts
+            - name: List files in spring-demo
+              run: ls -l ./helm-charts
+
             
