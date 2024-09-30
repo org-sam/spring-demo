@@ -78,7 +78,8 @@ jobs:
               uses: actions/checkout@v4
               with:
                 repository: org-sam/helm-charts
+                path: helm-charts/spring-demo
             - name: List files in spring-demo
-              run: ls -l ./helm-charts
+              run: ls -l
 
             
