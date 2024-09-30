@@ -69,4 +69,4 @@ jobs:
                 region: us-east-1
                 tags: latest,${{ github.run_id }}
                 create_repo: true
-                image_scanning_configuration: false
+                image_scanning_configuration: true
