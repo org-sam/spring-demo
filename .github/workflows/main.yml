@@ -12,60 +12,77 @@ env:
     IMAGE_TAG: "${{ github.repository }}/${{ github.ref_name }}"
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        container:
-            image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
-        steps:
-            - uses: actions/checkout@v4
-            - name: Build project
-              run: |
-                ./gradlew --version
-                ./gradlew assemble --info
-            - uses: actions/upload-artifact@v4
-              with:
-                name: ${{ env.ARTIFACT_NAME }}
-                path: ./build
-                retention-days: 1
+    # build:
+    #     runs-on: ubuntu-latest
+    #     container:
+    #         image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - name: Build project
+    #           run: |
+    #             ./gradlew --version
+    #             ./gradlew assemble --info
+    #         - uses: actions/upload-artifact@v4
+    #           with:
+    #             name: ${{ env.ARTIFACT_NAME }}
+    #             path: ./build
+    #             retention-days: 1
 
-    publish:
-        needs: [build]
+    # publish:
+    #     needs: [build]
+    #     runs-on: ubuntu-latest
+    #     if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
+    #     environment: ${{ 
+    #         github.ref_name == 'main' && 'prod' || 
+    #         github.ref_name == 'stage' && 'stage' || 
+    #         github.ref_name == 'dev' && 'dev'
+    #         }}
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #             name: ${{ env.ARTIFACT_NAME }}
+    #             path: ./build
+    #         - name: Analyze Dockerfile
+    #           uses: hadolint/hadolint-action@v3.1.0
+    #           with:
+    #             dockerfile: ./Dockerfile
+    #             no-fail: true
+    #         - name: Build an image for Trivy
+    #           run: |
+    #             docker build -t trivy-image:${{ github.run_id }} .
+    #         - name: Trivy image vulnerability scanner
+    #           uses: aquasecurity/trivy-action@0.23.0
+    #           with:
+    #             scan-type: 'image'
+    #             image-ref: 'trivy-image:${{ github.run_id }}'
+    #             format: 'table'
+    #             ignore-unfixed: true
+    #             vuln-type: 'os,library'
+    #             severity: 'HIGH,CRITICAL'                
+    #         - uses: kciter/aws-ecr-action@v3
+    #           with:
+    #             access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #             secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #             account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+    #             repo: ${{ env.IMAGE_TAG }}
+    #             region: us-east-1
+    #             tags: latest,${{ github.run_id }}
+    #             create_repo: true
+    
+    deploy:
         runs-on: ubuntu-latest
-        if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
-        environment: ${{ 
-            github.ref_name == 'main' && 'prod' || 
-            github.ref_name == 'stage' && 'stage' || 
-            github.ref_name == 'dev' && 'dev'
-            }}
         steps:
-            - uses: actions/checkout@v4
-            - uses: actions/download-artifact@v4
-              with:
-                name: ${{ env.ARTIFACT_NAME }}
-                path: ./build
-            - name: Analyze Dockerfile
-              uses: hadolint/hadolint-action@v3.1.0
-              with:
-                dockerfile: ./Dockerfile
-                no-fail: true
-            - name: Build an image for Trivy
+            - name: Teste1
+              run: echo "Teste1..."
+            - name: Teste2
+              run: echo "Teste2..."
+            - run: echo "Teste3..."
+            - name: Teste4
+              run: echo "Teste4..."
+            - name: Teste5
               run: |
-                docker build -t trivy-image:${{ github.run_id }} .
-            - name: Trivy image vulnerability scanner
-              uses: aquasecurity/trivy-action@0.23.0
-              with:
-                scan-type: 'image'
-                image-ref: 'trivy-image:${{ github.run_id }}'
-                format: 'table'
-                ignore-unfixed: true
-                vuln-type: 'os,library'
-                severity: 'HIGH,CRITICAL'                
-            - uses: kciter/aws-ecr-action@v3
-              with:
-                access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-                repo: ${{ env.IMAGE_TAG }}
-                region: us-east-1
-                tags: latest,${{ github.run_id }}
-                create_repo: true
+                echo "Teste5.1..."
+                echo "Teste5.2..."
+            - run: echo "Teste6..."
+            
