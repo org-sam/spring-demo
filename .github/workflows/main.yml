@@ -73,16 +73,6 @@ jobs:
     deploy:
         runs-on: ubuntu-latest
         steps:
-            - name: Teste1
-              run: echo "Teste1..." && sleep 2
-            - name: Teste2
-              run: echo "Teste2..." && sleep 2
-            - run: echo "Teste3..." && sleep 2
-            - name: Teste4
-              run: echo "Teste4..." && sleep 2
-            - name: Teste5
-              run: |
-                echo "Teste5.1..." && sleep 2
-                echo "Teste5.2..." && sleep 2
-            - run: echo "Teste6..."
+            - uses: actions/checkout@v4
+            - run: git clone --depth 1 https://github.com/org-sam/repo-deploy && ls -l
             
