@@ -40,6 +40,11 @@ jobs:
             }}
         steps:
             - uses: actions/checkout@v4
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: ${{ env.ARTIFACT_NAME }}
+                path: ./build
             - name: Analyze Dockerfile
               uses: hadolint/hadolint-action@v3.1.0
               with:
@@ -59,12 +64,7 @@ jobs:
             - name: Upload Trivy scan results to GitHub Security tab
               uses: github/codeql-action/upload-sarif@v3
               with:
-                sarif_file: 'trivy-docker-result.sarif'
-            - name: Download artifacts
-              uses: actions/download-artifact@v4
-              with:
-                name: ${{ env.ARTIFACT_NAME }}
-                path: ./build
+                sarif_file: 'trivy-docker-result.sarif'            
             # - uses: kciter/aws-ecr-action@v3
             #   with:
             #     access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
