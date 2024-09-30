@@ -79,7 +79,10 @@ jobs:
               with:
                 repository: org-sam/helm-charts
                 path: helm-charts/spring-demo
+                # path: helm-charts
+                # sparse-checkout: |
+                #     spring-demo
             - name: List files in spring-demo
-              run: ls -l
+              run: ls -l ./helm-charts
 
             
