@@ -78,10 +78,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                 repository: org-sam/helm-charts
-                path: helm-charts/spring-demo
-                # path: helm-charts
-                # sparse-checkout: |
-                #     spring-demo
+                path: helm-charts
             - name: List files in spring-demo
               run: ls -l ./helm-charts
 
