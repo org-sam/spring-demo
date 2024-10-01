@@ -72,6 +72,7 @@ jobs:
                 create_repo: true
     
     deploy:
+        needs: [publish]
         runs-on: ubuntu-latest
         if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
         environment: ${{ 
