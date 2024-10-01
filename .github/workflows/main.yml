@@ -82,15 +82,15 @@ jobs:
             AWS_REGION: us-east-1
             PROJECT_NAME: spring-demo
         steps:
-            - name: Set Repository Name
-              id: repo-name
-              run: echo "REPO_NAME=${{ github.repository }} | cut -d '/' -f2" >> $GITHUB_ENV
+            - name: Extract repository name
+              id: extract_name
+              run: |
+                REPO_NAME=$(echo "${{ github.repository }}" | awk -F'/' '{print $2}')
+                echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+                echo "Repository name: $REPO_NAME"
 
-            - name: Print Repository Name
-              run: echo "Repository name is ${{ env.REPO_NAME }}"
-
-            - name: Another step
-              run: echo "Using the repository name ${{ env.REPO_NAME }}"
+            - name: Print repository name
+              run: echo "The repository name is ${{ env.REPO_NAME }}"
 
             # - uses: actions/checkout@v4
             # - name: Checkout helm-charts repository
