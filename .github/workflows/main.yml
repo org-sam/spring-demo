@@ -60,7 +60,8 @@ jobs:
     #             ignore-unfixed: true
     #             vuln-type: 'os,library'
     #             severity: 'HIGH,CRITICAL'                
-    #         - uses: kciter/aws-ecr-action@v3
+    #         - name: Push image in AWS ECR
+    #           uses: kciter/aws-ecr-action@v3
     #           with:
     #             access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
     #             secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -109,7 +110,7 @@ jobs:
                     --install \
                     --debug \
                     --namespace ${{ env.PROJECT_NAME}} \
-                    --set image=${{ env.IMAGE_TAG }} \
+                    --set image="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_TAG }}" \
                     --set tagsDatadogVersion="v${{ github.run_id }}" \
                     --set ddGitCommitSHA="${{ github.sha }}" \
                     --set ddGitRepositoryURL="https://github.com/${{ github.repository }}" \
