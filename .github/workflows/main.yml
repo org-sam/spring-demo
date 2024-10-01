@@ -72,6 +72,12 @@ jobs:
     
     deploy:
         runs-on: ubuntu-latest
+        if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
+        environment: ${{ 
+            github.ref_name == 'main' && 'prod' || 
+            github.ref_name == 'stage' && 'stage' || 
+            github.ref_name == 'dev' && 'dev'
+            }}
         env:
             AWS_REGION: us-east-1
             PROJECT_NAME: ${GITHUB_REPOSITORY##*/}
