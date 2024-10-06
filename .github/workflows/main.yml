@@ -13,20 +13,14 @@ env:
 
 jobs:
     build:
-        runs-on: ubuntu-latest
-        container:
-            image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
-        steps:
-            - uses: actions/checkout@v4
-            - name: Build project
-              run: |
-                ./gradlew --version
-                ./gradlew assemble --info
-            - uses: actions/upload-artifact@v4
-              with:
-                name: ${{ env.ARTIFACT_NAME }}
-                path: ./build
-                retention-days: 1
+        uses: org-sam-2/templates-ci/.github/workflows/build-java.yaml@main
+        with:
+          container_image: 'public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine'
+          build_commands: |
+            ./gradlew --version
+            ./gradlew assemble --info
+          artifact_name: ${{ env.ARTIFACT_NAME }}
+          artifact_paths: './build'
 
     publish:
         needs: [build]
