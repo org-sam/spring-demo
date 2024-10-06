@@ -19,97 +19,96 @@ jobs:
           build_commands: |
             ./gradlew --version
             ./gradlew assemble --info
-          artifact_name: ${{ env.ARTIFACT_NAME }}
           artifact_paths: './build'
 
-    publish:
-        needs: [build]
-        runs-on: ubuntu-latest
-        if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
-        environment: ${{ 
-            github.ref_name == 'main' && 'prod' || 
-            github.ref_name == 'stage' && 'stage' || 
-            github.ref_name == 'dev' && 'dev'
-            }}
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/download-artifact@v4
-              with:
-                name: ${{ env.ARTIFACT_NAME }}
-                path: ./build
-            - name: Analyze Dockerfile
-              uses: hadolint/hadolint-action@v3.1.0
-              with:
-                dockerfile: ./Dockerfile
-                no-fail: true
-            - name: Build an image for Trivy
-              run: |
-                docker build -t trivy-image:${{ github.run_id }} .
-            - name: Trivy image vulnerability scanner
-              uses: aquasecurity/trivy-action@0.23.0
-              with:
-                scan-type: 'image'
-                image-ref: 'trivy-image:${{ github.run_id }}'
-                format: 'table'
-                ignore-unfixed: true
-                vuln-type: 'os,library'
-                severity: 'HIGH,CRITICAL'                
-            - name: Push image in AWS ECR
-              uses: kciter/aws-ecr-action@v3
-              with:
-                access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-                repo: ${{ env.IMAGE_TAG }}
-                region: us-east-1
-                tags: latest,${{ github.run_id }}
-                create_repo: true
+    # publish:
+    #     needs: [build]
+    #     runs-on: ubuntu-latest
+    #     if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
+    #     environment: ${{ 
+    #         github.ref_name == 'main' && 'prod' || 
+    #         github.ref_name == 'stage' && 'stage' || 
+    #         github.ref_name == 'dev' && 'dev'
+    #         }}
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - uses: actions/download-artifact@v4
+    #           with:
+    #             name: ${{ env.ARTIFACT_NAME }}
+    #             path: ./build
+    #         - name: Analyze Dockerfile
+    #           uses: hadolint/hadolint-action@v3.1.0
+    #           with:
+    #             dockerfile: ./Dockerfile
+    #             no-fail: true
+    #         - name: Build an image for Trivy
+    #           run: |
+    #             docker build -t trivy-image:${{ github.run_id }} .
+    #         - name: Trivy image vulnerability scanner
+    #           uses: aquasecurity/trivy-action@0.23.0
+    #           with:
+    #             scan-type: 'image'
+    #             image-ref: 'trivy-image:${{ github.run_id }}'
+    #             format: 'table'
+    #             ignore-unfixed: true
+    #             vuln-type: 'os,library'
+    #             severity: 'HIGH,CRITICAL'                
+    #         - name: Push image in AWS ECR
+    #           uses: kciter/aws-ecr-action@v3
+    #           with:
+    #             access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #             secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #             account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+    #             repo: ${{ env.IMAGE_TAG }}
+    #             region: us-east-1
+    #             tags: latest,${{ github.run_id }}
+    #             create_repo: true
     
-    deploy:
-        needs: [publish]
-        runs-on: ubuntu-latest
-        if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
-        environment: ${{ 
-            github.ref_name == 'main' && 'prod' || 
-            github.ref_name == 'stage' && 'stage' || 
-            github.ref_name == 'dev' && 'dev'
-            }}
-        env:
-            AWS_REGION: us-east-1
-        steps:
-            - name: Extract repository name
-              run: |
-                PROJECT_NAME=$(echo "${{ github.repository }}" | awk -F'/' '{print $2}')
-                echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
-            - uses: actions/checkout@v4
-            - name: Checkout helm-charts repository
-              uses: actions/checkout@v4
-              with:
-                repository: org-sam/helm-charts
-                path: helm-charts
-            - name: Set up AWS credentials
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: ${{ env.AWS_REGION }}
-            - name: Set up kubeconfig
-              run: echo "aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}"
-            - name: Verify hashs of helm-charts
-              run: find ./helm-charts/${{ env.PROJECT_NAME}}/ -type f -exec md5sum {} +
-            - name: Deploy in kubernetes
-              run: |
-                echo 'helm upgrade ${{ env.PROJECT_NAME}} ./helm-charts/${{ env.PROJECT_NAME}} \
-                    -f ./helm-charts/${{ env.PROJECT_NAME}}/${{ github.ref_name }}.yaml \
-                    --atomic \
-                    --install \
-                    --debug \
-                    --namespace ${{ env.PROJECT_NAME}} \
-                    --set image="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_TAG }}" \
-                    --set tagsDatadogVersion="v${{ github.run_id }}" \
-                    --set ddGitCommitSHA="${{ github.sha }}" \
-                    --set ddGitRepositoryURL="https://github.com/${{ github.repository }}" \
-                    --timeout 10m'
+    # deploy:
+    #     needs: [publish]
+    #     runs-on: ubuntu-latest
+    #     if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
+    #     environment: ${{ 
+    #         github.ref_name == 'main' && 'prod' || 
+    #         github.ref_name == 'stage' && 'stage' || 
+    #         github.ref_name == 'dev' && 'dev'
+    #         }}
+    #     env:
+    #         AWS_REGION: us-east-1
+    #     steps:
+    #         - name: Extract repository name
+    #           run: |
+    #             PROJECT_NAME=$(echo "${{ github.repository }}" | awk -F'/' '{print $2}')
+    #             echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
+    #         - uses: actions/checkout@v4
+    #         - name: Checkout helm-charts repository
+    #           uses: actions/checkout@v4
+    #           with:
+    #             repository: org-sam/helm-charts
+    #             path: helm-charts
+    #         - name: Set up AWS credentials
+    #           uses: aws-actions/configure-aws-credentials@v4
+    #           with:
+    #             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #             aws-region: ${{ env.AWS_REGION }}
+    #         - name: Set up kubeconfig
+    #           run: echo "aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}"
+    #         - name: Verify hashs of helm-charts
+    #           run: find ./helm-charts/${{ env.PROJECT_NAME}}/ -type f -exec md5sum {} +
+    #         - name: Deploy in kubernetes
+    #           run: |
+    #             echo 'helm upgrade ${{ env.PROJECT_NAME}} ./helm-charts/${{ env.PROJECT_NAME}} \
+    #                 -f ./helm-charts/${{ env.PROJECT_NAME}}/${{ github.ref_name }}.yaml \
+    #                 --atomic \
+    #                 --install \
+    #                 --debug \
+    #                 --namespace ${{ env.PROJECT_NAME}} \
+    #                 --set image="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_TAG }}" \
+    #                 --set tagsDatadogVersion="v${{ github.run_id }}" \
+    #                 --set ddGitCommitSHA="${{ github.sha }}" \
+    #                 --set ddGitRepositoryURL="https://github.com/${{ github.repository }}" \
+    #                 --timeout 10m'
 
 
             
