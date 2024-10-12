@@ -23,7 +23,6 @@ jobs:
     publish:
         needs: [build]
         runs-on: ubuntu-latest
-        if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
         env:
             IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
@@ -43,7 +42,6 @@ jobs:
                   no-fail: true
             
             - name: Configure AWS credentials
-              if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
               uses: aws-actions/configure-aws-credentials@v4
               with:
                 role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
@@ -57,24 +55,15 @@ jobs:
                 aws ecr describe-repositories --repository-names "${{ env.IMAGE_REPO }}" || \
                 aws ecr create-repository --repository-name "${{ env.IMAGE_REPO }}"
             
-            - name: Build an image for Trivy
-              run: |
-                docker build -t ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }} .
-            - name: Trivy image vulnerability scanner
-              uses: aquasecurity/trivy-action@0.23.0
+            - name: Push Docker image to ECR
+              uses: docker/build-push-action@v4
               with:
-                scan-type: 'image'
-                image-ref: '${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}'
-                format: 'table'
-                ignore-unfixed: true
-                vuln-type: 'os,library'
-                severity: 'HIGH,CRITICAL'
+                context: .
+                push: true
+                tags: |
+                    ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}
+                    ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
     
-            - name: Push to ECR
-              run: |
-                docker tag ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }} ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
-                docker push ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}
-                docker push ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
 
     # publish:
     #     needs: [build]
