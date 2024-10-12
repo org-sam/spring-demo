@@ -10,10 +10,6 @@ on:
 permissions:
   id-token: write
 
-env:
-    IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
-    URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
-
 jobs:
     build:
         uses: org-sam-2/templates-ci/.github/workflows/build-java.yaml@main
@@ -28,11 +24,10 @@ jobs:
         needs: [build]
         runs-on: ubuntu-latest
         if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
-        environment: ${{ 
-            github.ref_name == 'main' && 'prod' || 
-            github.ref_name == 'stage' && 'stage' || 
-            github.ref_name == 'dev' && 'dev'
-            }}
+        environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
+        env:
+            IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
+            URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
         steps:
             - uses: actions/checkout@v4
             
@@ -60,7 +55,7 @@ jobs:
             - name: Ensure ECR Repository Exists
               run: |
                 aws ecr describe-repositories --repository-names "${{ env.IMAGE_REPO }}" || \
-                aws ecr create-repository --repository-name "${{ env.IMAGE_REPO }}"            
+                aws ecr create-repository --repository-name "${{ env.IMAGE_REPO }}"
             
             - name: Build an image for Trivy
               run: |
@@ -75,7 +70,7 @@ jobs:
                 vuln-type: 'os,library'
                 severity: 'HIGH,CRITICAL'
     
-            - name: Push in ECR
+            - name: Push to ECR
               run: |
                 docker tag ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }} ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
                 docker push ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}
