@@ -11,7 +11,8 @@ permissions:
   id-token: write
 
 env:
-    IMAGE_TAG: "${{ github.repository }}/${{ github.ref_name }}"
+    IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
+    URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
 
 jobs:
     build:
@@ -40,6 +41,12 @@ jobs:
                 name: build-artifact
                 path: ./build
             
+            - name: Analyze Dockerfile
+              uses: hadolint/hadolint-action@v3.1.0
+              with:
+                  dockerfile: ./Dockerfile
+                  no-fail: true
+            
             - name: Configure AWS credentials
               if: github.ref_name == 'main' || github.ref_name == 'stage' || github.ref_name == 'dev'
               uses: aws-actions/configure-aws-credentials@v4
@@ -50,19 +57,29 @@ jobs:
             - name: Login to Amazon ECR
               uses: aws-actions/amazon-ecr-login@v2
 
-            # - name: Ensure ECR Repository Exists
-            #   run: |
-            #     aws ecr describe-repositories --repository-names "${{ env.IMAGE_TAG }}" || \
-            #     aws ecr create-repository --repository-name "${{ env.IMAGE_TAG }}"
-    
-            - name: Build and Push Docker Image
-              uses: docker/build-push-action@v4
+            - name: Ensure ECR Repository Exists
+              run: |
+                aws ecr describe-repositories --repository-names "${{ env.IMAGE_REPO }}" || \
+                aws ecr create-repository --repository-name "${{ env.IMAGE_REPO }}"            
+            
+            - name: Build an image for Trivy
+              run: |
+                docker build -t ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }} .
+            - name: Trivy image vulnerability scanner
+              uses: aquasecurity/trivy-action@0.23.0
               with:
-                context: .
-                push: true
-                tags: |
-                  ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_TAG }}:${{ github.run_id }}
-                  ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_TAG }}:latest
+                scan-type: 'image'
+                image-ref: '${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}'
+                format: 'table'
+                ignore-unfixed: true
+                vuln-type: 'os,library'
+                severity: 'HIGH,CRITICAL'
+    
+            - name: Push in ECR
+              run: |
+                docker tag ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }} ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
+                docker push ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}
+                docker push ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
 
     # publish:
     #     needs: [build]
