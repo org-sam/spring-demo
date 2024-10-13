@@ -19,7 +19,7 @@ jobs:
             ./gradlew --version
             ./gradlew assemble --info
           artifact_paths: |
-            ./build
+            build/
     
     publish:
         needs: [build]
