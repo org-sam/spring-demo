@@ -18,7 +18,9 @@ jobs:
           build_commands: |
             ./gradlew --version
             ./gradlew assemble --info
-          artifact_paths: ./build, Dockerfile
+          artifact_paths: |
+            ./build
+            Dockerfile
     
     publish:
         needs: [build]
@@ -31,7 +33,7 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                 name: build-artifact
-                path: ./build
+                path: ./
             
             - name: Analyze Dockerfile
               uses: hadolint/hadolint-action@v3.1.0
