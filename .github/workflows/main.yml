@@ -18,7 +18,7 @@ jobs:
           build_commands: |
             ./gradlew --version
             ./gradlew assemble --info
-          artifact_paths: ./build
+          artifact_paths: ./build, Dockerfile
     
     publish:
         needs: [build]
