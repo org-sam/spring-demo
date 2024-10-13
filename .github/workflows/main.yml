@@ -64,13 +64,17 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
               if: ${{ env.MULTI_PLATFORM == 'true' }}
+
+            - name: Set platforms variable
+              run: |
+                echo "PLATFORMS=$( [ '${{ env.MULTI_PLATFORM }}' == 'true' ] && echo 'linux/amd64,linux/arm64' || echo 'linux/amd64' )" >> $GITHUB_ENV
             
             - name: Push Docker image to ECR
               uses: docker/build-push-action@v4
               with:
                 context: .
                 push: true
-                platforms: ${{ if: env.MULTI_PLATFORM == 'true' ? 'linux/amd64' : 'linux/amd64,linux/arm64' }}
+                platforms: ${{ env.PLATFORMS }}
                 tags: |
                     ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}
                     ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
