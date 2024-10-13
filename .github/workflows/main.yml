@@ -35,8 +35,9 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                 name: build-artifact
+                path: artifacts
             
-            - run: ls -l
+            - run: ls -l && echo && ls -l artifacts/
             
             # - name: Analyze Dockerfile
             #   uses: hadolint/hadolint-action@v3.1.0
