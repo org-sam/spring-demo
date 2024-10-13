@@ -28,7 +28,7 @@ jobs:
         env:
             IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
             URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
-            MULTI_PLATFORM: 'true'
+            MULTI_PLATFORM: 'false'
         steps:
             - uses: actions/checkout@v4
             
