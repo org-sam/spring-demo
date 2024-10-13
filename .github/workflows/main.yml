@@ -28,7 +28,7 @@ jobs:
         env:
             IMAGE_REPO: "${{ github.repository }}/${{ github.ref_name }}"
             URI_ECR: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
-            MULTI_PLATFORM: 'false'
+            MULTI_PLATFORM: 'true'
         steps:
             - uses: actions/checkout@v4
             
@@ -70,7 +70,7 @@ jobs:
               with:
                 context: .
                 push: true
-                platforms: linux/amd64
+                platforms: ${{ if: env.MULTI_PLATFORM == 'true' ? 'linux/amd64' : 'linux/amd64,linux/arm64' }}
                 tags: |
                     ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:${{ github.run_id }}
                     ${{ env.URI_ECR }}/${{ env.IMAGE_REPO }}:latest
