@@ -11,15 +11,15 @@ permissions:
   id-token: write
 
 jobs:
-    build:
-        uses: org-sam-2/templates-ci/.github/workflows/build-java.yaml@main
-        with:
-          container_image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
-          build_commands: |
-            ./gradlew --version
-            ./gradlew assemble --info
-          artifact_paths: |
-            build/
+    # build:
+    #     uses: org-sam-2/templates-ci/.github/workflows/build-java.yaml@main
+    #     with:
+    #       container_image: public.ecr.aws/docker/library/gradle:7.3.3-jdk17-alpine
+    #       build_commands: |
+    #         ./gradlew --version
+    #         ./gradlew assemble --info
+    #       artifact_paths: |
+    #         build/
     
     publish:
         # needs: [build]
@@ -32,7 +32,7 @@ jobs:
           docker_build_context: .
           docker_push_ecr: true
           hadolint_no_fail: true
-          aws_role_name: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
+          aws_role_name: 'arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd'
           aws_role_last_name: github-oicd
           aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
           aws_region: us-east-1
