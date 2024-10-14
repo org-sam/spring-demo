@@ -27,11 +27,7 @@ jobs:
         uses: org-sam-2/templates-ci/.github/workflows/publish-aws-ecr.yaml@main
         with:
           runs_on: ubuntu-latest
-          environment: ${{ 
-            github.ref_name == 'main' && 'prod' || 
-            github.ref_name == 'stage' && 'stage' || 
-            github.ref_name == 'dev' && 'dev'
-            }}
+          environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
           downloaded_name_artifacts: artifacts
           dockerfile: ./Dockerfile
           docker_build_context: .
