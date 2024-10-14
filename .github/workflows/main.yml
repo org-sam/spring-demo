@@ -20,7 +20,7 @@ jobs:
             ./gradlew assemble --info
           artifact_paths: |
             build/
-    
+
     publish:
         needs: [build]
         uses: org-sam-2/templates-ci/.github/workflows/publish-aws-ecr.yaml@main
@@ -33,7 +33,6 @@ jobs:
           docker_push_ecr: true
           hadolint_no_fail: true
           aws_role_last_name: github-oicd
-          aws_region: us-east-1
           multi_platform: 'false'
 
         # needs: [build]
