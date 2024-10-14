@@ -28,8 +28,8 @@ jobs:
           runs_on: ubuntu-latest
           environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
           downloaded_name_artifacts: artifacts
-          dockerfile: './Dockerfile'
-          docker_build_context: '.'
+          dockerfile: ./Dockerfile
+          docker_build_context: .
           docker_push_ecr: true
           hadolint_no_fail: true
           aws_role_to_assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-oicd
