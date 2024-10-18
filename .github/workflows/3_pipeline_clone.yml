@@ -22,9 +22,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Clone another private repo
-              run: |
-                git clone https://x-access-token:${{ github.token }}@github.com/org-sam/helm-charts.git
+            # - name: Clone another private repo
+            #   run: |
+            #     git clone https://x-access-token:${{ github.token }}@github.com/org-sam/helm-charts.git
 
             - name: Checkout helm-charts repository
               uses: actions/checkout@v4
