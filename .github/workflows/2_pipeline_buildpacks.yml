@@ -30,7 +30,7 @@ jobs:
           with:
             image: my-app-image
             path: ./
-            builder: paketobuildpacks/builder-jammy-base:latest
+            builder: paketobuildpacks/builder-jammy-base
             tag: latest
     
             
