@@ -1,10 +1,10 @@
 name: 2- CI/CD Pipeline
 
 on:
-    push:
-        branches: ['main', 'stage', 'dev']
-    pull_request:
-        branches: ['main', 'stage', 'dev']
+    # push:
+    #     branches: ['main', 'stage', 'dev']
+    # pull_request:
+    #     branches: ['main', 'stage', 'dev']
     workflow_dispatch:
 
 permissions:
