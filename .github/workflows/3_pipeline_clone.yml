@@ -14,13 +14,20 @@ permissions:
 jobs:
     deploy:
         runs-on: ubuntu-latest
-        environment: ${{ 
-            github.ref_name == 'main' && 'prod' || 
-            github.ref_name == 'stage' && 'stage' || 
-            github.ref_name == 'dev' && 'dev'
-            }}
+        # environment: ${{ 
+        #     github.ref_name == 'main' && 'prod' || 
+        #     github.ref_name == 'stage' && 'stage' || 
+        #     github.ref_name == 'dev' && 'dev'
+        #     }}
         steps:
             - uses: actions/checkout@v4
+
+            - name: Clone org-sam/helm-charts PRIVATE repository
+              uses: GuillaumeFalourd/clone-github-repo-action@v2.3
+              with:
+                owner: 'org-sam'
+                repository: 'helm-charts'
+                access-token: ${{ secrets.ACCESS_TOKEN }}
 
             # - name: Clone another private repo
             #   run: |
